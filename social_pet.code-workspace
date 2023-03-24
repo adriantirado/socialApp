@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "social_pet",
+			"path": "../../../Documents/socialpet/social_pet"
+		}
+	],
+	"settings": {
+		"pubspec-assist.useLegacyParser": true
+	}
+}
