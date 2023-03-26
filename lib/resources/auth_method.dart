@@ -25,15 +25,16 @@ class AuthMethods {
     required String email,
     required String password,
     required String username,
+    required String confirmpassowrd,
     required String bio,
     required Uint8List file,
   }) async {
     String res = "Ha ocurrido algun error o no tiene conexion a internet";
     try {
-      if (email.isNotEmpty ||
-          password.isNotEmpty ||
-          username.isNotEmpty ||
-          bio.isNotEmpty) {
+      if (email.isNotEmpty &&
+          password.isNotEmpty &&
+          username.isNotEmpty &&
+          bio.isNotEmpty&& confirmpassowrd.isNotEmpty) {
         //Vanos a registrar usuario
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);

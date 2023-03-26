@@ -1,13 +1,16 @@
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'package:social_pet/providers/user_provider.dart';
 import 'package:social_pet/reponsive/mobile_screen.dart';
 import 'package:social_pet/reponsive/reponsive_screen.dart';
 import 'package:social_pet/reponsive/web_screen.dart';
 import 'package:social_pet/resources/auth_method.dart';
-
+import 'package:social_pet/models/user.dart' as model;
 import 'package:social_pet/utils/colors.dart';
 import 'package:social_pet/utils/utils.dart';
 import 'package:social_pet/widget/text_file_input.dart';
@@ -26,8 +29,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordconfirmController =
+      TextEditingController();
   Uint8List? _image;
   bool _isLoading = false;
+  var db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void dispose() {
@@ -37,6 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     _bioController.dispose();
     _usernameController.dispose();
+    _passwordconfirmController.dispose();
   }
 
   //Metodo que abre la galeria
@@ -67,14 +76,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_image == null) {
       showSnackBar(res1, context);
     }
+    String password = "No deje espacios en blanco";
+    if (_passwordconfirmController.text.isEmpty) {
+      showSnackBar(password, context);
+    } else {
+      String errorpas = "Las contraseñas no coinciden";
+      if (_passwordController.text != _passwordconfirmController.text) {
+        showSnackBar(errorpas, context);
+      }
+    }
     setState(() {
       _isLoading = false;
     });
-    
-     setState(() {
+  User currentUser = _auth.currentUser!;
+    DocumentSnapshot snap = await _firestore.collection('users').doc(currentUser.uid).get();
+
+    String user = "EL nombre de usuario ya existe";
+    print(snap.data());
+    if (_usernameController.text == snap.data()) {
+      showSnackBar(user, context);
+    }
+    setState(() {
       _isLoading = false;
-    }); 
-    
+    });
     //controlar username si esta vacio o no
     String userna = "No deje espacios en blancos";
     if (_usernameController.text.isEmpty || _bioController.text.isEmpty) {
@@ -88,6 +112,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       email: _emailController.text,
       password: _passwordController.text,
       username: _usernameController.text,
+      confirmpassowrd: _passwordconfirmController.text,
       bio: _bioController.text,
       file: _image!,
     );
@@ -98,14 +123,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (res != "Usuario registrado correctamente") {
       showSnackBar(res, context);
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const ReponsiveLayout(
-            mobileScreenLayout: LoginScreen(),
-            webScreenLayout: WebScreen(),
+      if (_passwordController.text == _passwordconfirmController.text) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const ReponsiveLayout(
+              mobileScreenLayout: LoginScreen(),
+              webScreenLayout: WebScreen(),
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        String errorpas2 = "Las contraseñas no coinciden";
+        showSnackBar(errorpas2, context);
+      }
     }
   }
 
@@ -220,6 +250,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
               TextFieldInput(
                 textEditingController: _passwordController,
                 hintText: 'Introduce tu contraseña',
+                textInputType: TextInputType.text,
+                isPass: true,
+              ),
+
+              const SizedBox(
+                height: 24,
+              ),
+              TextFieldInput(
+                textEditingController: _passwordconfirmController,
+                hintText: 'Confirmar contraseña',
                 textInputType: TextInputType.text,
                 isPass: true,
               ),

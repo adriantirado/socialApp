@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:social_pet/models/user.dart' as model;
 import 'package:social_pet/resources/firestore_method.dart';
 import 'package:social_pet/screen/comments_screen.dart';
+import 'package:social_pet/screen/profile_screen.dart';
 
 import 'package:social_pet/utils/colors.dart';
 import 'package:social_pet/utils/utils.dart';
@@ -63,6 +64,7 @@ class _PostCardState extends State<PostCard> {
                   radius: 16,
                   backgroundImage: NetworkImage(
                     widget.snap['profImage'],
+
                   ),
                 ),
                 Expanded(
@@ -73,11 +75,15 @@ class _PostCardState extends State<PostCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          
-                        child: Text(
-                          widget.snap['username'],
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                          onTap: () =>
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => ProfileScreen(
+                                        uid: widget.snap['uid'],
+                                      ))),
+                          child: Text(
+                            widget.snap['username'],
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ],
                     ),
@@ -125,12 +131,14 @@ class _PostCardState extends State<PostCard> {
                 isLikeAnimating = true;
               });
             },
-            child: Stack(alignment: Alignment.center, children: [
+            child: Stack(alignment: Alignment.center, children: 
+            [
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.40,
                 width: double.infinity,
                 child: Image.network(
                   widget.snap['postUrl'],
+                  
                   fit: BoxFit.cover,
                 ),
               ),
@@ -232,7 +240,12 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => CommentsScreen(
+                              snap: widget.snap,
+                            )));
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
@@ -252,6 +265,7 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
               ],
+              
             ),
           ),
         ],
